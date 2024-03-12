@@ -59,6 +59,25 @@ function App() {
       setIsModalVisible(true);
     }
   };
+  
+  const leaveRoom = async () => {
+    if (!account || !username) return;
+    const transaction: InputTransactionData = {
+      data: {
+        function: `${CONTRACT_ADDR}::chat_room::leave_chat_room`,
+        functionArguments: [ROOM_ADDR],
+      },
+    };
+
+    try {
+      const response = await signAndSubmitTransaction(transaction);
+      await aptos.waitForTransaction({ transactionHash: response.hash });
+      setIsModalVisible(true);
+      setUsername("");
+    } catch (error: any) {
+      setIsModalVisible(true);
+    }
+  };
 
   useEffect(() => {
     if (!account) return;
@@ -75,7 +94,8 @@ function App() {
   }, [account?.address]);
 
   useEffect(() => {
-    ws.current = new WebSocket("ws://35.226.192.229:12345/stream");
+    // ws.current = new WebSocket("ws://35.226.192.229:12345/stream");
+    ws.current = new WebSocket("ws://localhost:12345/stream");
     ws.current.onopen = () => {
       console.log("connected");
       ws.current?.send(`type,add,${CONTRACT_ADDR}::chat_room::JoinedChatRoom`);
@@ -228,17 +248,25 @@ function App() {
         />
       </Modal>
       <Layout>
-        <Row align="middle">
-          <Col span={5} offset={2}>
-            <h1>Event Stream Demo</h1>
-          </Col>
-          <Col span={5}>
-            <h1>Username: {username}</h1>
-          </Col>
-          <Col span={10} style={{ textAlign: "right" }}>
-            <WalletSelector />
-          </Col>
-        </Row>
+        <Layout.Header
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Row justify="space-between" align="middle" style={{ width: "100%" }}>
+            <Col>
+              <Button type="primary" onClick={leaveRoom}>Leave Room</Button>
+            </Col>
+            <Col flex="auto" style={{ textAlign: "center" }}>
+              <h1 style={{ margin: 0, color: "white" }}>Event Stream Demo</h1>
+            </Col>
+            <Col>
+              <WalletSelector />
+            </Col>
+          </Row>
+        </Layout.Header>
         <Layout.Content style={{ padding: "20px" }}>
           <List
             dataSource={chatMessages}
