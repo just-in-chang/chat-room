@@ -2,7 +2,6 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://just-in-chang.github.io/chat-room",
   "dependencies": {
     "@aptos-labs/ts-sdk": "^1.10.0",
     "@aptos-labs/wallet-adapter-ant-design": "^2.0.0",
@@ -18,13 +17,12 @@
     "petra-plugin-wallet-adapter": "^0.4.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.3",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "deploy": "gh-pages -d build",
-    "predeploy": "pnpm run build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -41,8 +39,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "gh-pages": "^6.1.1"
   }
 }
