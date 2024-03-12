@@ -47,7 +47,7 @@ module chat_room::chat_room {
     struct SentReaction has drop, store {
         sender: address,
         username: String,
-        message_index: u64,
+        message: String
     }
 
     #[event]
@@ -101,6 +101,7 @@ module chat_room::chat_room {
         assert!(exists<ChatRoom>(room_address), ECHAT_ROOM_DOES_NOT_EXIST);
 
         let sender_address = signer::address_of(sender);
+        let username = get_username(room_address, sender_address);
         let chat_room = borrow_global_mut<ChatRoom>(room_address);
         let user_index = get_user_index(chat_room, sender_address);
         assert!(user_index != smart_vector::length(&chat_room.users), EUSER_DOES_NOT_EXIST);
@@ -110,7 +111,6 @@ module chat_room::chat_room {
             reacts: 0,
         });
 
-        let username = smart_vector::borrow(&chat_room.users, user_index).username;
         event::emit(SentMessage {
             sender: sender_address,
             username,
@@ -123,6 +123,7 @@ module chat_room::chat_room {
         assert!(exists<ChatRoom>(room_address), ECHAT_ROOM_DOES_NOT_EXIST);
 
         let sender_address = signer::address_of(sender);
+        let username = get_username(room_address, sender_address);
         let chat_room = borrow_global_mut<ChatRoom>(room_address);
         let user_index = get_user_index(chat_room, sender_address);
         assert!(user_index != smart_vector::length(&chat_room.users), EUSER_DOES_NOT_EXIST);
@@ -132,8 +133,8 @@ module chat_room::chat_room {
 
         event::emit(SentReaction {
             sender: sender_address,
-            username: get_username(room_address, sender_address),
-            message_index,
+            username,
+            message: message.message,
         });
     }
 

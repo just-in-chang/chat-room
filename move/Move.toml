@@ -9,6 +9,6 @@ rev = 'main'
 subdir = 'aptos-move/framework/aptos-framework'
 
 [addresses]
-chat_room = "6a2c2da253c6f1efca174dc3f06e28210618d3e47072ad202d6d1992c08900ac"
+chat_room = "f7b036b6eb1dfadd1255f3aba0398b146e16f34aa510ee07b58439d0e80be211"
 
 [dev-addresses]
