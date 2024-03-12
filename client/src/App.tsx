@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Layout, Row, Col, Input, Button, List, Modal } from "antd";
 import { WalletSelector } from "@aptos-labs/wallet-adapter-ant-design";
 import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
-import { Aptos } from "@aptos-labs/ts-sdk";
+import { Aptos, ViewRequest } from "@aptos-labs/ts-sdk";
 import {
   useWallet,
   InputTransactionData,
@@ -12,7 +12,7 @@ const aptos = new Aptos();
 const ROOM_ADDR =
   "0x5d7cc9fdb838a482a7f6a781fa4baee72f7c434cf1242300dc0e8e2d700e192e";
 const CONTRACT_ADDR =
-  "0xf7b036b6eb1dfadd1255f3aba0398b146e16f34aa510ee07b58439d0e80be211";
+  "0xd50d955258a24a801cea515ca94d58890852eba3d45796cce14819c2845f1b7e";
 
 interface Event {
   sequence_number: number;
@@ -40,7 +40,7 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState<string>("");
   const [username, setUsername] = useState<string>("");
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const ws = useRef<WebSocket | null>(null);
 
   const joinRoom = async () => {
@@ -61,12 +61,21 @@ function App() {
   };
 
   useEffect(() => {
-    joinRoom();
+    if (!account) return;
+    const payload: ViewRequest = {
+      function: `${CONTRACT_ADDR}::chat_room::get_username`,
+      typeArguments: [],
+      functionArguments: [ROOM_ADDR, account.address],
+    };
+
+    aptos
+      .view<string[]>({ payload })
+      .then((r) => setUsername(r[0]))
+      .catch((_) => setIsModalVisible(true));
   }, [account?.address]);
 
-  // Initialize WebSocket connection
   useEffect(() => {
-    ws.current = new WebSocket("ws://localhost:12345/stream"); // Replace with your WebSocket URL
+    ws.current = new WebSocket("ws://35.226.192.229:12345/stream");
     ws.current.onopen = () => {
       console.log("connected");
       ws.current?.send(`type,add,${CONTRACT_ADDR}::chat_room::JoinedChatRoom`);
@@ -105,10 +114,32 @@ function App() {
           ]);
           break;
         case `${CONTRACT_ADDR}::chat_room::JoinedChatRoom`:
+          if (message.data.room_address !== ROOM_ADDR) break;
           console.log(`${message.data.username} joined the chat room`);
+          setChatMessages((prevMessages) => [
+            ...prevMessages,
+            {
+              type: "join",
+              sender: message.data.sender,
+              username: message.data.username,
+              message: `${message.data.username} has joined the chat room!`,
+              message_index: 0,
+            },
+          ]);
           break;
         case `${CONTRACT_ADDR}::chat_room::LeftChatRoom`:
+          if (message.data.room_address !== ROOM_ADDR) break;
           console.log(`${message.data.username} left the chat room`);
+          setChatMessages((prevMessages) => [
+            ...prevMessages,
+            {
+              type: "leave",
+              sender: message.data.sender,
+              username: message.data.username,
+              message: `${message.data.username} has left the chat room!`,
+              message_index: 0,
+            },
+          ]);
           break;
         default:
           break;
@@ -118,10 +149,6 @@ function App() {
       ws.current?.close();
     };
   }, []);
-
-  useEffect(() => {
-    console.log("Current chatMessages state: ", chatMessages);
-  }, [chatMessages]);
 
   // Function to send a chat message
   const sendMessage = async () => {
@@ -225,12 +252,14 @@ function App() {
                   title={
                     item.type === "chat" ? (
                       item.username
-                    ) : (
+                    ) : item.type === "react" ? (
                       <img
                         src={`${process.env.PUBLIC_URL}/react.png`}
                         alt="React"
                         style={{ width: "24px", height: "24px" }}
                       />
+                    ) : (
+                      "👋"
                     )
                   }
                   description={item.message}

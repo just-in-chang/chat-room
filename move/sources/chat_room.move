@@ -32,6 +32,7 @@ module chat_room::chat_room {
     #[event]
     struct JoinedChatRoom has drop, store {
         sender: address,
+        room_address: address,
         username: String,
     }
 
@@ -53,6 +54,7 @@ module chat_room::chat_room {
     #[event]
     struct LeftChatRoom has drop, store {
         sender: address,
+        room_address: address,
         username: String,
     }
 
@@ -93,6 +95,7 @@ module chat_room::chat_room {
 
         event::emit(JoinedChatRoom {
             sender: sender_address,
+            room_address,
             username,
         });
     }
@@ -149,6 +152,7 @@ module chat_room::chat_room {
         let user = smart_vector::remove(&mut chat_room.users, user_index);
         event::emit(LeftChatRoom {
             sender: sender_address,
+            room_address,
             username: user.username,
         });
     }
