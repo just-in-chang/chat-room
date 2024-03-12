@@ -59,7 +59,7 @@ function App() {
       setIsModalVisible(true);
     }
   };
-  
+
   const leaveRoom = async () => {
     if (!account || !username) return;
     const transaction: InputTransactionData = {
@@ -94,8 +94,8 @@ function App() {
   }, [account?.address]);
 
   useEffect(() => {
-    // ws.current = new WebSocket("ws://35.226.192.229:12345/stream");
-    ws.current = new WebSocket("ws://localhost:12345/stream");
+    ws.current = new WebSocket("ws://35.226.192.229:12345/stream");
+    // ws.current = new WebSocket("ws://localhost:12345/stream");
     ws.current.onopen = () => {
       console.log("connected");
       ws.current?.send(`type,add,${CONTRACT_ADDR}::chat_room::JoinedChatRoom`);
@@ -257,7 +257,9 @@ function App() {
         >
           <Row justify="space-between" align="middle" style={{ width: "100%" }}>
             <Col>
-              <Button type="primary" onClick={leaveRoom}>Leave Room</Button>
+              <Button type="primary" onClick={leaveRoom}>
+                Leave Room
+              </Button>
             </Col>
             <Col flex="auto" style={{ textAlign: "center" }}>
               <h1 style={{ margin: 0, color: "white" }}>Event Stream Demo</h1>
@@ -295,20 +297,32 @@ function App() {
               </List.Item>
             )}
           />
-          <Row>
-            <Col span={20}>
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Type your message here..."
-              />
-            </Col>
-            <Col span={4}>
-              <Button type="primary" onClick={sendMessage}>
-                Send
-              </Button>
-            </Col>
-          </Row>
+          <Layout.Footer
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Row
+              justify="space-around"
+              align="middle"
+              style={{ width: "100%" }}
+            >
+              <Col style={{ width: "80%" }}>
+                <Input
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Type your message here..."
+                />
+              </Col>
+              <Col span={4}>
+                <Button type="primary" onClick={sendMessage}>
+                  Send
+                </Button>
+              </Col>
+            </Row>
+          </Layout.Footer>
         </Layout.Content>
       </Layout>
     </>
